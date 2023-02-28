@@ -1,4 +1,3 @@
-#Saving File into GitHub repository
 rm(list=ls(all=TRUE))
 sessionInfo()
 ## Install dada2 package
@@ -124,7 +123,7 @@ prevdf = data.frame(Prevalence = prevdf,
                     tax_table(ps))
 
 ## Filtering
-#  Define prevalence threshold as 5% of total samples
+#  Define prevalence threshold as 1% of total samples
 prevalenceThreshold = 0.01 * nsamples(ps)
 
 # Filter out prevalence
@@ -142,7 +141,7 @@ names <- taxa_names(ps2.top10)
 names
 plot_bar(ps2.top10, fill="Genus")+ 
   scale_fill_brewer(palette='Paired')+
-  theme_classic()+
+  theme_classic(base_size=24)+
   scale_x_discrete(limits=c("AH1T0", "AH2T0", "AH3T0", "CR3T0", "CR8", "CR10", "CR14", "IR1T0", "IR2T0", "IR3T0", "LL1T0", "LL2T0", "LL3T0", "MC1T0", "MC2T0","MC3T0", 'CH1T0','CH2T0','CH3T0'))+
   theme(axis.text.x = element_text(angle=60, hjust=1))+
   ylab('Relative Abundance (%)')
@@ -170,7 +169,7 @@ nmds<-plot_ordination(ps2, ord.nmds.bray, color="Site", shape="Date", title=" ")
 nmds = nmds + geom_point(size=7, alpha=0.75)
 nmds= nmds+ scale_color_brewer(palette="Set1")
 nmds = nmds + geom_text(mapping = aes(label = samdf$ID), size = 4, vjust = 1.5) 
-nmds = nmds+theme_bw()
+nmds = nmds+theme_bw(base_size = 24)
 nmds
 
 ps2.top10@tax_table
@@ -178,7 +177,7 @@ ps2.top10@tax_table
 plot_richness(ps, measures=c("Shannon", "Simpson"), color="Site")+scale_color_brewer(palette = "Set1")
 
 MCY_Results<-read.csv("Deg_MCY_Abun.csv",header=TRUE,sep=',')
-ggplot(MCY_Results)+geom_point(aes(x=Avg_Rel_Abun,y=log(Avg_Tot_MCY),color=Site,shape=Date))+
+ggplot(MCY_Results)+geom_point(aes(x=Rel_Abun,y=log(Tot_MCY),color=Site,shape=Date))+
   geom_abline(slope=10,intercept=0)
   #geom_smooth(aes(x=Avg_Rel_Abun,y=Avg_Tot_MCY), method='lm', formula=(y~exp(x)))
 Exp.Model<-lm((log(Avg_Tot_MCY)~Avg_Rel_Abun), MCY_Results)
@@ -187,14 +186,18 @@ summary(Exp.Model)
 x<-seq(0,0.7,0.01)
 y=(4.473*exp(9.1453*x))
 plot(x,y)
-MCY_Res<-rbind(MCY_Results[3,],MCY_Results[6,],MCY_Results[10,],MCY_Results[13,],MCY_Results[16,],MCY_Results[19,])
-TTox_label<-expression(Average ~ Total ~ Microcystin ~ (µg ~ L^"-1"))
-ggplot()+geom_point(data=MCY_Res,aes(x=Avg_Rel_Abun,y=Avg_Tot_MCY,color=Site,shape=Date), size=5)+
+MCY_Res<-rbind(MCY_Results[2:6,],MCY_Results[10:16,],MCY_Results[19,])
+TTox_label<-expression(Total ~ Microcystin ~ (µg ~ L^"-1"))
+scatplot<-ggplot()+geom_point(data=MCY_Res,aes(x=Rel_Abun,y=Tot_MCY,color=Site,shape=Date), size=5)+
   scale_color_brewer(palette='Set1')+
   geom_line(aes(x=x,y=y))+
   ylim(0,1200)+
   ylab(TTox_label)+
-  xlab('Average Relative Abundance of Microcystis')+
-  theme_classic()
+  xlab('Rel. Abundance of Microcystis')+
+  theme_classic(base_size = 24)
+scatplot
 plot(x,y,type="l")
+ggarrange(scatplot,nmds,
+          nrow = 1,ncol = 2,common.legend = TRUE,
+          legend = 'right')
 #geom_smooth(aes(x=Avg_Rel_Abun,y=Avg_Tot_MCY), method='lm', formula=(y~exp(x)))
